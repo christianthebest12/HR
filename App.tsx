@@ -5,6 +5,15 @@ import CalendarView from './components/CalendarView';
 import GeminiAssistant from './components/GeminiAssistant';
 import { requestNotificationPermission, checkAndNotifyUpcoming } from './services/notificationService';
 import { LayoutDashboard, Trash2, Bell, BellOff, CalendarRange, PlusSquare, Download, Upload, Save, FolderDown, FolderUp, FileSpreadsheet } from 'lucide-react';
+import { testFirestore } from "./services/firestore"
+import { 
+  obtenerSolicitudes, 
+  crearSolicitud, 
+  eliminarSolicitud, 
+  actualizarSolicitud 
+} from "./services/solicitudesService"; 
+
+
 
 // Helper to parse CSV lines respecting quotes
 const parseCSVLine = (text: string) => {
@@ -58,6 +67,27 @@ const App: React.FC = () => {
     }
   }, []);
 
+  useEffect(() => {
+  testFirestore();
+}, []);
+
+// Cargar datos reales de Firestore al iniciar
+useEffect(() => {
+    const cargar = async () => {
+      const datos = await obtenerSolicitudes();
+      setSolicitudes(datos);
+    };
+    cargar();
+  }, []);
+
+  const handleSubmit = async (data: Omit<Solicitud, "id">) => {
+    const id = await crearSolicitud(data);
+    setSolicitudes(prev => [
+      ...prev,
+      { id, ...data }
+    ]);
+  };
+
   const handleEnableNotifications = async () => {
     const permission = await requestNotificationPermission();
     setNotifPermission(permission);
@@ -66,39 +96,42 @@ const App: React.FC = () => {
     }
   };
 
-  const handleSaveSolicitud = (data: Omit<Solicitud, 'id'>) => {
+  const handleSaveSolicitud = async (data: Omit<Solicitud, 'id'>) => {
     if (editingSolicitud) {
-      // Update existing
-      setSolicitudes((prev) => 
-        prev.map((s) => s.id === editingSolicitud.id ? { ...data, id: s.id } : s)
+      await actualizarSolicitud(editingSolicitud.id, data);
+
+      setSolicitudes(prev =>
+        prev.map(s => 
+          s.id === editingSolicitud.id ? { id: s.id, ...data } : s
+        )
       );
+
       setEditingSolicitud(null);
     } else {
-      // Create new
-      const solicitud: Solicitud = {
-        ...data,
-        id: crypto.randomUUID(),
-      };
-      setSolicitudes((prev) => [...prev, solicitud]);
+      const id = await crearSolicitud(data);
+      setSolicitudes(prev => [...prev, { id, ...data }]);
     }
-    
-    // Transición automática al calendario
+
     setActiveTab('calendario');
-  };
+};
+
 
   const handleEditRequest = (solicitud: Solicitud) => {
     setEditingSolicitud(solicitud);
     setActiveTab('registro');
   };
 
-  const handleDeleteRequest = (id: string) => {
-    if (confirm('¿Estás seguro de eliminar este registro del calendario?')) {
-      setSolicitudes((prev) => prev.filter((s) => s.id !== id));
-      if (editingSolicitud?.id === id) {
-        setEditingSolicitud(null);
-      }
-    }
-  };
+const handleDeleteRequest = async (id: string) => {
+  if (!confirm("¿Eliminar este registro?")) return;
+
+  await eliminarSolicitud(id);
+
+  setSolicitudes(prev => prev.filter(s => s.id !== id));
+
+  if (editingSolicitud?.id === id) {
+    setEditingSolicitud(null);
+  }
+};
 
   const handleCancelEdit = () => {
     setEditingSolicitud(null);
