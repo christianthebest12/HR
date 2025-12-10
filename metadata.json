@@ -1,0 +1,5 @@
+{
+  "name": "Gestor de Solicitudes y Calendario",
+  "description": "Una aplicación inteligente para gestionar solicitudes de permisos, vacaciones y días compensatorios con visualización de calendario y asistente de IA.",
+  "requestFramePermissions": []
+}
