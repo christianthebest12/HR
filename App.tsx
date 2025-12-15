@@ -3,8 +3,9 @@ import { Solicitud, Area, Peticion } from './types';
 import SolicitudForm from './components/SolicitudForm';
 import CalendarView from './components/CalendarView';
 import GeminiAssistant from './components/GeminiAssistant';
+import PasswordModal from "./components/PasswordModal"
 import { requestNotificationPermission, checkAndNotifyUpcoming } from './services/notificationService';
-import { LayoutDashboard, Trash2, Bell, BellOff, CalendarRange, PlusSquare, Download, Upload, Save, FolderDown, FolderUp, FileSpreadsheet } from 'lucide-react';
+import { LayoutDashboard, Trash2, Bell, BellOff, CalendarRange, PlusSquare, Download, Upload, Save, FolderDown, FolderUp, FileSpreadsheet, Eye, EyeOff } from 'lucide-react';
 import { testFirestore } from "./services/firestore"
 import { 
   obtenerSolicitudes, 
@@ -12,8 +13,6 @@ import {
   eliminarSolicitud, 
   actualizarSolicitud 
 } from "./services/solicitudesService"; 
-
-
 
 // Helper to parse CSV lines respecting quotes
 const parseCSVLine = (text: string) => {
@@ -36,6 +35,42 @@ const parseCSVLine = (text: string) => {
 };
 
 const App: React.FC = () => {
+
+  // Calendar Auth
+  const [showCalendarAuth, setShowCalendarAuth] = useState(true);
+  const [calendarPassword, setCalendarPassword] = useState("");
+  const [calendarAuthorized, setCalendarAuthorized] = useState(false);
+  const [calendarError, setCalendarError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [authenticated, setAuthenticated] = useState(false);
+  
+    useEffect(() => {
+      const session = localStorage.getItem("calendar_auth")
+      if (session === "true") {
+        setAuthenticated(true)
+      }
+    }, [])
+  
+    const handleSuccessLogin = () => {
+      localStorage.setItem("calendar_auth", "true");
+      setAuthenticated(true)
+    }
+  
+    {!authenticated && (
+      <PasswordModal onSuccess={handleSuccessLogin} />
+    )}
+  // Contraseña del calendario
+  const CALENDAR_PASSWORD = "HolaCalendarioTH123*"
+
+  const handleCalendarAuth = () => {
+    if (calendarPassword === CALENDAR_PASSWORD) {
+      setCalendarAuthorized(true);
+      setShowCalendarAuth(false);
+    } else {
+      setCalendarError("Contraseña incorrecta, por favor inténtelo de nuevo.")
+    }
+  }
+
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>(() => {
     try {
       const saved = localStorage.getItem('solicitudes');
@@ -259,6 +294,63 @@ const handleDeleteRequest = async (id: string) => {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans flex flex-col">
+
+      {activeTab === 'calendario' && showCalendarAuth && (
+        
+        <div className="fixed inset-0 bg-black/50 z/50 flex items-center justify-center">
+
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleCalendarAuth();
+            }}
+            className='bg-white rounded-x1 p-8 w-full max-w-sm shadow-x1'
+          >
+
+            <h2 className="text-x1 font-bold mb-4 text-center">
+              
+              Acceso al calendario
+            
+            </h2>
+
+            <div className="relative mb-3">
+              
+                <input 
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Ingrese la contraseña"
+                  value={calendarPassword}
+                  onChange={(e) => setCalendarPassword(e.target.value)}
+                  className="w-full px-4 py-3 border rounded-xl pr-12 focus:outline-none focus:ring-2 focus:ring-primary"
+                  autoFocus
+                />
+
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(prev => !prev)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700"
+                  title={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
+
+              {calendarError && (
+                <p className="text-red-500 text-sm mb-3">{calendarError}</p>
+              )}
+
+              <button
+                type="submit"
+                className="w-full bg-primary text-white py-3 rounded-x1 font-bold hover:bg-blue-600 transition"
+              >
+                Entrar
+              </button>
+
+          </form>
+
+        </div>
+
+      )}
+
       {/* Navbar */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
@@ -339,7 +431,14 @@ const handleDeleteRequest = async (id: string) => {
             {editingSolicitud ? 'Editar Registro' : 'Registrar Datos'}
           </button>
           <button
-            onClick={() => setActiveTab('calendario')}
+            onClick={() => {
+              setActiveTab('calendario');
+              setCalendarAuthorized(false);
+              setShowCalendarAuth(true);
+              setCalendarPassword("");
+              setCalendarError("");
+              setShowPassword(false)
+            }}
             className={`flex items-center gap-2 py-4 text-sm font-semibold border-b-2 transition-all ${
               activeTab === 'calendario' 
                 ? 'border-primary text-primary' 
@@ -377,7 +476,7 @@ const handleDeleteRequest = async (id: string) => {
         )}
 
         {/* Tab 2: Calendario */}
-        {activeTab === 'calendario' && (
+        {activeTab === 'calendario' && calendarAuthorized &&(
           <div className="h-[750px] animate-in fade-in zoom-in-95 duration-300">
              <CalendarView 
                solicitudes={solicitudes} 
