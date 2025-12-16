@@ -37,39 +37,29 @@ const parseCSVLine = (text: string) => {
 const App: React.FC = () => {
 
   // Calendar Auth
-  const [showCalendarAuth, setShowCalendarAuth] = useState(true);
-  const [calendarPassword, setCalendarPassword] = useState("");
-  const [calendarAuthorized, setCalendarAuthorized] = useState(false);
-  const [calendarError, setCalendarError] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [authenticated, setAuthenticated] = useState(false);
-  
+    const [authenticated, setAuthenticated] = useState(false);
+    const [showPasswordModal, setShowPassword] = useState(false)
+
     useEffect(() => {
       const session = localStorage.getItem("calendar_auth")
       if (session === "true") {
-        setAuthenticated(true)
+        setAuthenticated(true);
       }
     }, [])
   
     const handleSuccessLogin = () => {
       localStorage.setItem("calendar_auth", "true");
-      setAuthenticated(true)
+      setAuthenticated(true);
+      setShowPassword(false);
+      setActiveTab("calendario");
     }
-  
-    {!authenticated && (
-      <PasswordModal onSuccess={handleSuccessLogin} />
-    )}
-  // Contraseña del calendario
-  const CALENDAR_PASSWORD = "HolaCalendarioTH123*"
 
-  const handleCalendarAuth = () => {
-    if (calendarPassword === CALENDAR_PASSWORD) {
-      setCalendarAuthorized(true);
-      setShowCalendarAuth(false);
-    } else {
-      setCalendarError("Contraseña incorrecta, por favor inténtelo de nuevo.")
-    }
-  }
+    const handleLogout = () => {
+      localStorage.removeItem("calendar_auth");
+      setAuthenticated(false);
+      setActiveTab("registro");
+      setShowPassword(false);
+    };
 
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>(() => {
     try {
@@ -291,64 +281,12 @@ const handleDeleteRequest = async (id: string) => {
     // Reset input value to allow selecting the same file again if needed
     event.target.value = '';
   };
-
+  
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans flex flex-col">
 
-      {activeTab === 'calendario' && showCalendarAuth && (
-        
-        <div className="fixed inset-0 bg-black/50 z/50 flex items-center justify-center">
-
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleCalendarAuth();
-            }}
-            className='bg-white rounded-x1 p-8 w-full max-w-sm shadow-x1'
-          >
-
-            <h2 className="text-x1 font-bold mb-4 text-center">
-              
-              Acceso al calendario
-            
-            </h2>
-
-            <div className="relative mb-3">
-              
-                <input 
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Ingrese la contraseña"
-                  value={calendarPassword}
-                  onChange={(e) => setCalendarPassword(e.target.value)}
-                  className="w-full px-4 py-3 border rounded-xl pr-12 focus:outline-none focus:ring-2 focus:ring-primary"
-                  autoFocus
-                />
-
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(prev => !prev)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700"
-                  title={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
-                >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
-              </div>
-
-              {calendarError && (
-                <p className="text-red-500 text-sm mb-3">{calendarError}</p>
-              )}
-
-              <button
-                type="submit"
-                className="w-full bg-primary text-white py-3 rounded-x1 font-bold hover:bg-blue-600 transition"
-              >
-                Entrar
-              </button>
-
-          </form>
-
-        </div>
-
+      {showPasswordModal && !authenticated && (
+        <PasswordModal onSuccess={handleSuccessLogin} />
       )}
 
       {/* Navbar */}
@@ -389,6 +327,22 @@ const handleDeleteRequest = async (id: string) => {
                 <span className="hidden md:inline">Restaurar</span>
                 <input type="file" accept=".json,.csv" onChange={handleImportData} className="hidden" />
               </label>
+              
+              {authenticated && (
+
+                <button
+                  onClick={handleLogout}
+                  className="text-xs font-semibold text-slate-500 hover:text-red-600 hover:bg-red-50 transition-colors flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200"
+                  title="Cerrar sesión del calendario"
+                >
+
+                  <EyeOff className="w-4 h-4" />
+                  <span className="hidden sm:inline">Cerrar Sesión</span>
+
+                </button>
+
+              )}
+
             </div>
 
             <button 
@@ -432,12 +386,13 @@ const handleDeleteRequest = async (id: string) => {
           </button>
           <button
             onClick={() => {
-              setActiveTab('calendario');
-              setCalendarAuthorized(false);
-              setShowCalendarAuth(true);
-              setCalendarPassword("");
-              setCalendarError("");
-              setShowPassword(false)
+              
+              if (!authenticated) {
+                setShowPassword(true)
+              } else {
+                setActiveTab('calendario');
+              }
+
             }}
             className={`flex items-center gap-2 py-4 text-sm font-semibold border-b-2 transition-all ${
               activeTab === 'calendario' 
@@ -453,38 +408,47 @@ const handleDeleteRequest = async (id: string) => {
 
       {/* Main Content */}
       <main className="flex-1 max-w-6xl mx-auto w-full p-4 sm:p-6 lg:p-8">
-        
-        {/* Tab 1: Formulario de Registro / Edición */}
-        {activeTab === 'registro' && (
-          <div className="max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-300">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-slate-800 mb-2">
-                {editingSolicitud ? 'Editar Solicitud' : 'Nueva Solicitud'}
-              </h2>
-              <p className="text-slate-500">
-                {editingSolicitud 
-                  ? 'Modifica los datos y guarda los cambios.' 
-                  : 'Completa la información requerida para registrar el evento en el calendario.'}
-              </p>
-            </div>
-            <SolicitudForm 
-              onSubmit={handleSaveSolicitud} 
-              initialData={editingSolicitud || undefined}
-              onCancel={editingSolicitud ? handleCancelEdit : undefined}
-            />
-          </div>
+
+        {!showPasswordModal && (
+
+          <>
+
+            {/* Tab 1: Formulario de Registro / Edición */}
+            {activeTab === 'registro' && (
+              <div className="max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-300">
+                <div className="text-center mb-8">
+                  <h2 className="text-2xl font-bold text-slate-800 mb-2">
+                    {editingSolicitud ? 'Editar Solicitud' : 'Nueva Solicitud'}
+                  </h2>
+                  <p className="text-slate-500">
+                    {editingSolicitud 
+                      ? 'Modifica los datos y guarda los cambios.' 
+                      : 'Completa la información requerida para registrar el evento en el calendario.'}
+                  </p>
+                </div>
+                <SolicitudForm 
+                  onSubmit={handleSaveSolicitud} 
+                  initialData={editingSolicitud || undefined}
+                  onCancel={editingSolicitud ? handleCancelEdit : undefined}
+                />
+              </div>
+            )}
+          
+            {/* Tab 2: Calendario */}
+            {activeTab === 'calendario' && authenticated &&(
+              <div className="h-[750px] animate-in fade-in zoom-in-95 duration-300">
+                <CalendarView 
+                  solicitudes={solicitudes} 
+                  onEdit={handleEditRequest}
+                  onDelete={handleDeleteRequest}
+                />
+              </div>
+            )}
+          
+          </>
+
         )}
 
-        {/* Tab 2: Calendario */}
-        {activeTab === 'calendario' && calendarAuthorized &&(
-          <div className="h-[750px] animate-in fade-in zoom-in-95 duration-300">
-             <CalendarView 
-               solicitudes={solicitudes} 
-               onEdit={handleEditRequest}
-               onDelete={handleDeleteRequest}
-             />
-          </div>
-        )}
 
       </main>
 
