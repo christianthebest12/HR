@@ -16,6 +16,7 @@ export enum Peticion {
   DIA_FAMILIA = 'DIA DE LA FAMILIA',
   COMPENSATORIO = 'COMPENSATORIO',
   DIA_NO_REMUNERADO = 'DIA NO REMUNERADO',
+  DIA_REMUNERADO_ANUAL = "DIA REMUNERADO ANUAL",
   VACACIONES = 'VACACIONES'
 }
 
@@ -33,6 +34,7 @@ export const PETICION_COLORS: Record<Peticion, string> = {
   [Peticion.DIA_FAMILIA]: 'bg-yellow-100 text-yellow-800 border-yellow-200',
   [Peticion.COMPENSATORIO]: 'bg-green-100 text-green-800 border-green-200',
   [Peticion.DIA_NO_REMUNERADO]: 'bg-gray-100 text-gray-800 border-gray-200',
+  [Peticion.DIA_REMUNERADO_ANUAL]: 'bg-blue-100 text-blue-800 border-blue-200',
   [Peticion.VACACIONES]: 'bg-sky-100 text-sky-800 border-sky-200',
 };
 
@@ -41,5 +43,6 @@ export const PETICION_DOT_COLORS: Record<Peticion, string> = {
   [Peticion.DIA_FAMILIA]: 'bg-yellow-500',
   [Peticion.COMPENSATORIO]: 'bg-green-500',
   [Peticion.DIA_NO_REMUNERADO]: 'bg-gray-500',
+  [Peticion.DIA_REMUNERADO_ANUAL]: 'bg-blue-500',
   [Peticion.VACACIONES]: 'bg-sky-500',
 };
