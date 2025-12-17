@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Area, Peticion, Solicitud } from '../types';
+import { Area, Peticion, Solicitud } from '../../types';
 import { Calendar as CalendarIcon, User, Briefcase, Tag, CheckCircle2, RefreshCw, XCircle } from 'lucide-react';
 
 interface SolicitudFormProps {

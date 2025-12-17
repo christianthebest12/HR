@@ -14,8 +14,8 @@ import {
   parseISO
 } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Solicitud, PETICION_COLORS } from '../types';
-import { getHoliday } from '../services/holidayService';
+import { Solicitud, PETICION_COLORS } from '../../types';
+import { getHoliday } from '../../services/holidayService';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, X, Edit2, Trash2, Clock, User, Briefcase, Tag, PartyPopper } from 'lucide-react';
 
 interface CalendarViewProps {

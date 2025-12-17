@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { Solicitud, Area, Peticion } from './types';
+import { Solicitud, Area, Peticion } from '../types';
 import SolicitudForm from './components/SolicitudForm';
 import CalendarView from './components/CalendarView';
 import PasswordModal from "./components/PasswordModal"
-import { requestNotificationPermission, checkAndNotifyUpcoming } from './services/notificationService';
+import { requestNotificationPermission, checkAndNotifyUpcoming } from '../services/notificationService';
 import { LayoutDashboard, Trash2, Bell, BellOff, CalendarRange, PlusSquare, Download, Upload, Save, FolderDown, FolderUp, FileSpreadsheet, Eye, EyeOff } from 'lucide-react';
-import { testFirestore } from "./services/firestore"
+import { testFirestore } from "../services/firestore"
 import { 
   obtenerSolicitudes, 
   crearSolicitud, 
   eliminarSolicitud, 
   actualizarSolicitud 
-} from "./services/solicitudesService"; 
+} from "../services/solicitudesService"; 
 
-import logo_iAgency from "./img/logo_iAgency.png";
+import logo_iAgency from "./img/logo_iAgency.png"
 
 // Helper to parse CSV lines respecting quotes
 const parseCSVLine = (text: string) => {
@@ -283,6 +283,7 @@ const handleDeleteRequest = async (id: string) => {
     event.target.value = '';
   };
   
+  console.log(logo_iAgency)
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans flex flex-col">
 
@@ -294,7 +295,8 @@ const handleDeleteRequest = async (id: string) => {
       <header className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src={logo_iAgency} alt="Logo iAgency" className="w-20"/>
+            
+            <img src={logo_iAgency} alt="Logo iAgency" className="w-auto h-20"/>
             <h1 className="font-bold text-xl tracking-tight text-slate-800 hidden sm:block">
               Calendario <span className="text-primary">iAgency</span>
             </h1>
