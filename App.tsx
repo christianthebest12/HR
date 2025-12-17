@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Solicitud, Area, Peticion } from './types';
 import SolicitudForm from './components/SolicitudForm';
 import CalendarView from './components/CalendarView';
-import GeminiAssistant from './components/GeminiAssistant';
 import PasswordModal from "./components/PasswordModal"
 import { requestNotificationPermission, checkAndNotifyUpcoming } from './services/notificationService';
 import { LayoutDashboard, Trash2, Bell, BellOff, CalendarRange, PlusSquare, Download, Upload, Save, FolderDown, FolderUp, FileSpreadsheet, Eye, EyeOff } from 'lucide-react';
@@ -13,6 +12,8 @@ import {
   eliminarSolicitud, 
   actualizarSolicitud 
 } from "./services/solicitudesService"; 
+
+import logo_iAgency from "./img/logo_iAgency.png";
 
 // Helper to parse CSV lines respecting quotes
 const parseCSVLine = (text: string) => {
@@ -135,9 +136,9 @@ useEffect(() => {
     } else {
       const id = await crearSolicitud(data);
       setSolicitudes(prev => [...prev, { id, ...data }]);
-    }
 
-    setActiveTab('calendario');
+      alert("✅ Solicitud enviada correctamente.")
+    }
 };
 
 
@@ -293,11 +294,9 @@ const handleDeleteRequest = async (id: string) => {
       <header className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-gradient-to-tr from-primary to-blue-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-500/20 transform rotate-3">
-              <LayoutDashboard className="w-5 h-5" />
-            </div>
+            <img src={logo_iAgency} alt="Logo iAgency" className="w-20"/>
             <h1 className="font-bold text-xl tracking-tight text-slate-800 hidden sm:block">
-              Gestor<span className="text-primary">Plan</span>
+              Calendario <span className="text-primary">iAgency</span>
             </h1>
           </div>
           
@@ -451,9 +450,6 @@ const handleDeleteRequest = async (id: string) => {
 
 
       </main>
-
-      {/* Gemini Assistant available globally */}
-      <GeminiAssistant solicitudes={solicitudes} />
     </div>
   );
 };

@@ -66,7 +66,7 @@ const SolicitudForm: React.FC<SolicitudFormProps> = ({ onSubmit, initialData, on
         <div className="space-y-2">
           <label className="text-sm font-bold text-slate-700 flex items-center gap-2 uppercase tracking-wide">
             <User className="w-4 h-4 text-primary" />
-            Nombre y Apellido
+            Nombre Completo
           </label>
           <input
             type="text"
@@ -178,7 +178,7 @@ const SolicitudForm: React.FC<SolicitudFormProps> = ({ onSubmit, initialData, on
             ) : (
               <>
                 <CheckCircle2 className="w-6 h-6" />
-                Registrar y Ver
+                Registrar Solicitud
               </>
             )}
           </button>
